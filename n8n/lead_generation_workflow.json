@@ -1,0 +1,494 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lead_generation",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -208,
+        64
+      ],
+      "id": "d3003b9b-425e-4032-820a-54f7a0e62227",
+      "name": "Webhook",
+      "webhookId": "ae837037-d95c-4187-b388-b1afb5d888f9"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "98b7fb32-cf21-47ac-92fb-cd7e12b81fa3",
+              "name": "body.query",
+              "value": "={{ $json.body.query }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        16,
+        64
+      ],
+      "id": "7c104b58-d8fa-4607-8ad0-fefdf016f21d",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "url": "https://maps.googleapis.com/maps/api/place/textsearch/json",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ $json.keyword }}"
+            },
+            {
+              "name": "key",
+              "value": "AIzaSyBMViSQm9c_5t2b147rUlpEpJIBfyidJu8"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "8fdf0f15-7ff9-4f30-8939-174749c8973f",
+      "name": "HTTP (Places Text Search)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1040,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nconst results = data.results || [];\nconst nextToken = data.next_page_token || null;\n\nreturn [{\n  json: {\n    next_page_token: nextToken,\n    results: results\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1264,
+        64
+      ],
+      "id": "48c56afc-54d7-40f2-ac0a-6f6c21bd2b11",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "9182aede-7e43-40c4-81c0-fcc77ee92bc1",
+              "leftValue": "={{ $json.results}}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1488,
+        64
+      ],
+      "id": "943ab1f0-955f-4118-8972-18345e617c42",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "maxItems": 20
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        1936,
+        64
+      ],
+      "id": "c1efd3be-73a1-4879-a7c6-6cf631ea9e63",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.first().json.results"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1712,
+        64
+      ],
+      "id": "f057ed4f-2d21-4690-b3ce-9b5a5aaa69f2",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1PryUuxZYr6FaTJTNwA10aEmU957ed-QI2aiMnjKcIt4",
+          "mode": "list",
+          "cachedResultName": "Lead Genaration AI",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1PryUuxZYr6FaTJTNwA10aEmU957ed-QI2aiMnjKcIt4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1PryUuxZYr6FaTJTNwA10aEmU957ed-QI2aiMnjKcIt4/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $json.result.name }}",
+            "formatted_phone_number": "={{ $json.result.formatted_phone_number }}",
+            "website": "={{ $json.result.website }}",
+            "formatted_address": "={{ $json.result.formatted_address }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "formatted_phone_number",
+              "displayName": "formatted_phone_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "website",
+              "displayName": "website",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "formatted_address",
+              "displayName": "formatted_address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2384,
+        -32
+      ],
+      "id": "816d3217-f952-470d-a9b8-9044eee5cd37",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "zyHFsTaxuGMgxjmg",
+          "name": "Google Sheets account 66"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.query }}",
+        "options": {
+          "systemMessage": "=You generate ONE short JSON object only.\n\nOutput EXACTLY in this format:\n{\"keyword\":\"<phrase>\"}\n\nIf you cannot confidently identify BOTH of these:\n1. A clear business type, service, or category (e.g., restaurant, real estate, hospital, gym, hotel, pharmacy, salon, etc.)\n2. A clear location (city, region, or country)\n\nthen output:\n{\"keyword\":\"\",\"message\":\"Please provide a specific business type or topic and location for Google Maps search.\"}\n\nRules:\n- Do NOT include markdown, code fences, or explanations.\n- The keyword must be formatted for Google Maps search.\n- Use this pattern:  <business type>, <location>\n- Avoid words like “in”, “at”, “city”, “town”, or “area”.\n- Use singular form when possible (e.g., “restaurant”, “hospital”, “school”).\n- Do not guess or return unrelated results for greetings or general chat.\n\nExamples:\n\nUser: \"I want real estate data from Dhaka, Bangladesh\"\n→ {\"keyword\":\"real estate, Dhaka, Bangladesh\"}\n\nUser: \"restaurants in Paris\"\n→ {\"keyword\":\"restaurant, Paris\"}\n\nUser: \"hospitals in Dhaka city\"\n→ {\"keyword\":\"hospital, Dhaka\"}\n\nUser: \"hello\"\n→ {\"keyword\":\"\",\"message\":\"Please provide a specific business type or topic and location for Google Maps search.\"}\n\nUser: \"show me gym data from New York\"\n→ {\"keyword\":\"gym, New York\"}\n\nUser: \"find schools near Delhi\"\n→ {\"keyword\":\"school, Delhi\"}\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        240,
+        64
+      ],
+      "id": "2be4ec71-1541-46f6-a8a4-3d3e6bfabaf8",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "jsCode": "let raw = $input.first().json.output || \"\";\nlet obj = {};\ntry {\n  obj = JSON.parse(raw);\n} catch (err) {\n  obj = {};\n}\nreturn { keyword: obj.keyword || \"\" };\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        592,
+        64
+      ],
+      "id": "ce135002-21f3-4408-9ab0-c2f02c1569e9",
+      "name": "Code in JavaScript3"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c031703d-0f5c-4983-a167-5e970082a144",
+              "leftValue": "={{ $json.keyword }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        816,
+        64
+      ],
+      "id": "00750a1e-9a9e-459b-ab3f-fa9d13e51e64",
+      "name": "If3"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        312,
+        288
+      ],
+      "id": "ece24dff-faf3-49d8-ac58-fcadf8c1a7f4",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "VRb5YIoi51fFWip3",
+          "name": "OpenAi account 47"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://maps.googleapis.com/maps/api/place/details/json?place_id={{ $json.place_id }}&fields=name,formatted_address,formatted_phone_number,international_phone_number,website,url,rating,user_ratings_total&key=AIzaSyCT4PiLk6v44GtG915tK1rpHCeow4PNq5M",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2160,
+        64
+      ],
+      "id": "083c8a97-9ff2-4251-9177-3dc97b893fd3",
+      "name": "Details"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        2384,
+        160
+      ],
+      "id": "3744b3fb-79d7-4ecf-95c0-3ac24e09027f",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP (Places Text Search)": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript3": {
+      "main": [
+        [
+          {
+            "node": "If3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If3": {
+      "main": [
+        [
+          {
+            "node": "HTTP (Places Text Search)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Details": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "50918ee0be4fd9ad8edd59da0eb4c4a6502c186d6a425a1cf635ba824838446e"
+  }
+}
