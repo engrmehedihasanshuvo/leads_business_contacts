@@ -13,4 +13,15 @@ module.exports = function(app) {
       logLevel: 'warn',
     })
   );
+
+  // Also support `/webhook/*` in case env vars are set to that prefix
+  app.use(
+    '/webhook',
+    createProxyMiddleware({
+      target: 'https://server3.automationlearners.pro',
+      changeOrigin: true,
+      secure: true,
+      logLevel: 'warn',
+    })
+  );
 };

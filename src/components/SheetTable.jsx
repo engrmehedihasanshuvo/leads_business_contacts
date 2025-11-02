@@ -102,6 +102,20 @@ export default function SheetTable({ rows = [], columns = [], pageSize = 10, res
       return copy;
     }
 
+    // Default: if a timestamp column `time` exists, sort by it descending (newest first)
+    const hasTime = copy.some(r => typeof r.time !== 'undefined' || typeof r.Time !== 'undefined');
+    if (hasTime) {
+      copy.sort((a, b) => {
+        const ta = Number((a.time ?? a.Time ?? 0));
+        const tb = Number((b.time ?? b.Time ?? 0));
+        // Non-numeric values become NaN; treat NaN as very old (lowest)
+        const va = Number.isNaN(ta) ? -Infinity : ta;
+        const vb = Number.isNaN(tb) ? -Infinity : tb;
+        return vb - va; // descending
+      });
+      return copy;
+    }
+
     // No explicit column sort — apply default weighted descending sort.
     // Fixed weights for sections/columns (adjustable here):
     const WEIGHTS = {
@@ -175,6 +189,7 @@ export default function SheetTable({ rows = [], columns = [], pageSize = 10, res
     if (c === 'formatted_phone_number') return 'Phone';
     if (c === 'formatted_address') return 'Address';
     if (c === 'website') return 'Website';
+    if (c === 'time') return 'Time';
     if (c === 'keyword') return 'Keyword';
     return c;
   }
